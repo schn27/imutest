@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import schn27.crc.Crc;
 import schn27.serial.Com;
 import schn27.serial.NotAvailableException;
 import schn27.serial.Serial;
@@ -181,10 +182,20 @@ public class Link implements Runnable {
 		}
 		
 		ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
-		bb.getInt();	// header
+		
+		Crc crc = new Crc((byte)32, 0x4c11db7, 0xffffffff, false, false, 0x00000000);
+		
+		for (int i = 0; i < 32; ++i) {
+			crc.accumulate(buffer[i]);
+		}
+		
+		if ((int)crc.get() != (int)bb.getInt(32)) {
+			return;	// wrong crc
+		}
 		
 		final float G = 9.81f;
 		
+		bb.position(4);
 		values.put("Gyro X", bb.getFloat());
 		values.put("Gyro Y", bb.getFloat());
 		values.put("Gyro Z", bb.getFloat());
@@ -194,9 +205,7 @@ public class Link implements Runnable {
 		values.put("Status", bb.get());
 		values.put("Sequence", bb.get());
 		values.put("Temperature", bb.getShort() * 0.01f);
-		valuesConsumer.accept(values);
-		
-		bb.getInt();	// CRC
+		valuesConsumer.accept(values);		
 	}
 
 	private void processMessage1() throws InterruptedException, NotAvailableException {
