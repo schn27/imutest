@@ -54,7 +54,7 @@ public class Version {
 		while (resources.hasMoreElements()) {
 			URL url = resources.nextElement();
 			
-			if (url.toString().contains("canecutest")) {
+			if (url.toString().contains("imutest")) {
 				try (InputStream stream = url.openStream()) {
 					return new Manifest(stream);
 				} catch (IOException ex) {
