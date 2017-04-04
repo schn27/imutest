@@ -42,10 +42,10 @@ import schn27.serial.Serial;
  * @author amalikov
  */
 public class Link implements Runnable {
-	public Link(String portName, 
+	public Link(String portName, int baudRate,
 			Consumer<Map<String, Object>> valuesConsumer,
 			Consumer<String> consoleConsumer) {
-		this.portName = portName;
+		serial = new Com(portName, baudRate);
 		this.valuesConsumer = valuesConsumer;
 		this.consoleConsumer = consoleConsumer;
 		
@@ -67,7 +67,6 @@ public class Link implements Runnable {
 		thread = Thread.currentThread();
 		
 		try {
-			serial = new Com(portName, 921600);
 			serial.open();
 			
 			while (!Thread.currentThread().isInterrupted() && running) {
@@ -85,8 +84,6 @@ public class Link implements Runnable {
 			} catch (IOException ex) {
 				log.log(Level.SEVERE, "exception", ex);
 			}
-			
-			serial = null;
 		}
 		
 		running = false;
@@ -224,12 +221,11 @@ public class Link implements Runnable {
 		ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
 	}	
 	
-	private final String portName;
+	private final Serial serial;
 	private final Consumer<Map<String, Object>> valuesConsumer;
 	private final Consumer<String> consoleConsumer;
 	private final Map<String, Object> values;
 	private Thread thread;
-	private Serial serial;
 	private volatile boolean running;
 	
 	private final byte[][] headers;

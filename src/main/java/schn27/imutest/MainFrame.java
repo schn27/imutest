@@ -96,13 +96,14 @@ public class MainFrame extends javax.swing.JFrame {
 
         btnOpen = new javax.swing.JButton();
         javax.swing.JTabbedPane jTabbedPane1 = new javax.swing.JTabbedPane();
-        javax.swing.JPanel jPanel1 = new javax.swing.JPanel();
+        chartsPanel = new javax.swing.JPanel();
+        javax.swing.JPanel consolePanel = new javax.swing.JPanel();
         consoleIn = new javax.swing.JTextField();
         javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
         consoleOut = new javax.swing.JList();
-        chartsPanel = new javax.swing.JPanel();
         portName = new javax.swing.JComboBox();
         gitVersion = new javax.swing.JLabel();
+        baudRate = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.title")); // NOI18N
@@ -115,6 +116,9 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
+        chartsPanel.setLayout(new java.awt.BorderLayout());
+        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.chartsPanel.TabConstraints.tabTitle"), chartsPanel); // NOI18N
+
         consoleIn.setText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.consoleIn.text")); // NOI18N
         consoleIn.setToolTipText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.consoleIn.toolTipText")); // NOI18N
         consoleIn.addActionListener(new java.awt.event.ActionListener() {
@@ -126,30 +130,31 @@ public class MainFrame extends javax.swing.JFrame {
         consoleOut.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane1.setViewportView(consoleOut);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout consolePanelLayout = new javax.swing.GroupLayout(consolePanel);
+        consolePanel.setLayout(consolePanelLayout);
+        consolePanelLayout.setHorizontalGroup(
+            consolePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 811, Short.MAX_VALUE)
             .addComponent(consoleIn)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+        consolePanelLayout.setVerticalGroup(
+            consolePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, consolePanelLayout.createSequentialGroup()
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 519, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(consoleIn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
-        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.jPanel1.TabConstraints.tabTitle"), jPanel1); // NOI18N
-
-        chartsPanel.setLayout(new java.awt.BorderLayout());
-        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.chartsPanel.TabConstraints.tabTitle"), chartsPanel); // NOI18N
+        jTabbedPane1.addTab(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.consolePanel.TabConstraints.tabTitle"), consolePanel); // NOI18N
 
         portName.setToolTipText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.portName.toolTipText")); // NOI18N
 
         gitVersion.setText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.gitVersion.text")); // NOI18N
         gitVersion.setToolTipText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.gitVersion.toolTipText")); // NOI18N
+
+        baudRate.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "9600", "19200", "38400", "57600", "115200", "460800", "576000", "921600" }));
+        baudRate.setSelectedIndex(7);
+        baudRate.setToolTipText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.baudRate.toolTipText")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -158,10 +163,12 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(portName, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(baudRate, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnOpen, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(gitVersion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(gitVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 357, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(jTabbedPane1)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -169,7 +176,8 @@ public class MainFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(portName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnOpen)
-                    .addComponent(gitVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(gitVersion, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(baudRate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jTabbedPane1))
         );
@@ -186,7 +194,8 @@ public class MainFrame extends javax.swing.JFrame {
 			
 			if (portNameStr != null) {
 				link = new Link(
-						portNameStr, 
+						portNameStr,
+						Integer.parseInt((String)baudRate.getSelectedItem()),
 						status -> java.awt.EventQueue.invokeLater(() -> charts.add(status)),
 						consoleString -> java.awt.EventQueue.invokeLater(() -> printToConsoleOut(consoleString))
 				);
@@ -210,6 +219,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_consoleInActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox baudRate;
     private javax.swing.JButton btnOpen;
     private javax.swing.JPanel chartsPanel;
     private javax.swing.JTextField consoleIn;
