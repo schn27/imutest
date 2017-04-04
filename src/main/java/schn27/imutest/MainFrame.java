@@ -127,6 +127,12 @@ public class MainFrame extends javax.swing.JFrame {
         chartsPanel.setLayout(new java.awt.BorderLayout());
         tabbedPane.addTab(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.chartsPanel.TabConstraints.tabTitle"), chartsPanel); // NOI18N
 
+        consolePanel.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent evt) {
+                consolePanelComponentShown(evt);
+            }
+        });
+
         consoleIn.setText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.consoleIn.text")); // NOI18N
         consoleIn.setToolTipText(org.openide.util.NbBundle.getMessage(MainFrame.class, "MainFrame.consoleIn.toolTipText")); // NOI18N
         consoleIn.addActionListener(new java.awt.event.ActionListener() {
@@ -136,6 +142,8 @@ public class MainFrame extends javax.swing.JFrame {
         });
 
         consoleOut.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        consoleOut.setFocusable(false);
+        consoleOut.setRequestFocusEnabled(false);
         jScrollPane1.setViewportView(consoleOut);
 
         javax.swing.GroupLayout consolePanelLayout = new javax.swing.GroupLayout(consolePanel);
@@ -242,6 +250,10 @@ public class MainFrame extends javax.swing.JFrame {
 			link.setMode(tabbedPane.getSelectedComponent() == consolePanel);
 		}
     }//GEN-LAST:event_tabbedPaneStateChanged
+
+    private void consolePanelComponentShown(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_consolePanelComponentShown
+        consoleIn.requestFocus();
+    }//GEN-LAST:event_consolePanelComponentShown
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox baudRate;
