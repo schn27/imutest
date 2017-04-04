@@ -59,8 +59,23 @@ public class Link implements Runnable {
 		
 		buffer = new byte[256];
 		outStream = new ByteArrayOutputStream();
+		
+		sequenceNumber = -1;
 	}
-	
+
+	public void setMode(boolean console) {
+		lostMessages = 0;
+		sequenceNumber = -1;
+		
+		consoleCommand("=config," + (console ? "1" : "0"));
+		this.console = console;
+	}
+
+	public void consoleCommand(String text) {
+		text += "\r\n";
+		serial.write(text.getBytes(), 0, text.length());
+	}
+
 	@Override
 	public void run() {
 		running = true;
@@ -71,7 +86,11 @@ public class Link implements Runnable {
 			
 			while (!Thread.currentThread().isInterrupted() && running) {
 				try {
-					processData();
+					if (console) {
+						processConsole();
+					} else {
+						processData();
+					}
 				} catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
@@ -99,61 +118,18 @@ public class Link implements Runnable {
 			}
 		}
 	}
-	
-	public void sendCommand(String text) {
-		text += "\r\n";
-		serial.write(text.getBytes(), 0, text.length());
-	}
-	
+		
 	private void processData() throws InterruptedException, NotAvailableException {
 		if (serial.read(buffer, bufferPos, 1, 50) != 1) {
 			bufferPos = 0;
-			outStream.reset();
 		} else {
 			++bufferPos;
 					
 			if (getHeaderIndex() < 0) {
-				processConsole();
+				bufferPos = 0;
 			} else if (bufferPos == 4) {
 				processMessage();
 			}
-		}
-	}
-	
-	private int getHeaderIndex() {
-		for (int i = 0; i < headers.length; ++i) {
-			byte header[] = headers[i];
-			
-			boolean equals = true;
-			
-			for (int j = 0; j < bufferPos; ++j) {
-				equals &= header[j] == buffer[j];
-			}
-			
-			if (equals) {
-				return i;
-			}
-		}
-		
-		return -1;
-	}
-	
-	private void processConsole() {
-		int b = buffer[bufferPos - 1] & 0xff;
-		bufferPos = 0;
-		
-		if (b < 128) {
-			outStream.write(b);
-
-			if (b == '\n') {
-				String str = outStream.toString();
-				outStream.reset();
-				if (str.length() >= 2) {
-					consoleConsumer.accept(str.substring(0, str.length() - 2));
-				}
-			}
-		} else {
-			outStream.reset();
 		}
 	}
 
@@ -172,6 +148,24 @@ public class Link implements Runnable {
 		
 		bufferPos = 0;
 	}
+
+	private int getHeaderIndex() {
+		for (int i = 0; i < headers.length; ++i) {
+			byte header[] = headers[i];
+			
+			boolean equals = true;
+			
+			for (int j = 0; j < bufferPos; ++j) {
+				equals &= header[j] == buffer[j];
+			}
+			
+			if (equals) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}	
 	
 	private void processMessage0() throws InterruptedException, NotAvailableException {
 		if (serial.read(buffer, bufferPos, 32, 50) != 32) {
@@ -190,6 +184,14 @@ public class Link implements Runnable {
 			return;	// wrong crc
 		}
 		
+		int messageSequenceNumber = bb.get(29) & 0xFF;
+		
+		if (sequenceNumber >= 0) {
+			lostMessages += (messageSequenceNumber - (sequenceNumber + 1)) & 0x7f;
+		}
+		
+		sequenceNumber = messageSequenceNumber;
+		
 		final float G = 9.81f;
 		
 		bb.position(4);
@@ -202,6 +204,7 @@ public class Link implements Runnable {
 		values.put("Status", bb.get());
 		values.put("Sequence", bb.get());
 		values.put("Temperature", bb.getShort() * 0.01f);
+		values.put("Lost messages", lostMessages);
 		valuesConsumer.accept(values);		
 	}
 
@@ -210,7 +213,7 @@ public class Link implements Runnable {
 			return;
 		}
 		
-		ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
+		//ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
 	}	
 
 	private void processMessage2() throws InterruptedException, NotAvailableException {
@@ -218,8 +221,27 @@ public class Link implements Runnable {
 			return;
 		}
 		
-		ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
+		//ByteBuffer bb = ByteBuffer.wrap(buffer, 0, 256).order(ByteOrder.BIG_ENDIAN);
 	}	
+			
+	private void processConsole() throws InterruptedException, NotAvailableException {
+		if (serial.read(buffer, 0, 1, 50) == 1) {
+			int b = buffer[0] & 0xff;
+			if (b < 128) {
+				outStream.write(b);
+
+				if (b == '\n') {
+					String str = outStream.toString();
+					outStream.reset();
+					if (str.length() >= 2) {
+						consoleConsumer.accept(str.substring(0, str.length() - 2));
+					}
+				}
+			} else {
+				outStream.reset();
+			}
+		}
+	}
 	
 	private final Serial serial;
 	private final Consumer<Map<String, Object>> valuesConsumer;
@@ -227,13 +249,13 @@ public class Link implements Runnable {
 	private final Map<String, Object> values;
 	private Thread thread;
 	private volatile boolean running;
-	
 	private final byte[][] headers;
-
 	private final byte[] buffer;
 	private int bufferPos;
-		
 	private final ByteArrayOutputStream outStream;
-
+	private boolean console;
+	private int lostMessages;
+	private int sequenceNumber;
+	
 	private static final Logger log = Logger.getLogger(Link.class.getName());
 }
